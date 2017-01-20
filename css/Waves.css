@@ -6,14 +6,28 @@ html, body {
 	overflow:hidden;
 	width: 100%;
 	height: 100%;
-	margin:0px !important;
+	margin:0px;
 }
 
 
 
-#main {
+.canvas {
 	margin:25px;
-	position:relative;
+	position: absolute;
+	top:0;
+	left:0;
 	overflow: hidden;
+}
+
+#main {
+	z-index: 1;
+}
+
+#background {
+	z-index: -200px;
+}
+
+#sky {
+	z-index: -500px;
 }
 
