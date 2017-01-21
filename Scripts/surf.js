@@ -89,7 +89,7 @@ function spawnSeagull() {
 
 var characterpath = "Assets/Graphics/chara1_idle-";
 var seagullpath = "Assets/Graphics/emptyseagull.png";
-var obstaclePath = "Assets/Graphics/EmptyTrash.png";
+var obstaclePath = "Assets/Graphics/Trash.png";
 var obstacleSize = {h: 200, w: 200}
 var gravity = 10;
 var wavePushback = 5;
@@ -222,13 +222,13 @@ function getRandomArbitrary(min, max) {
 function randomObstaclePath() {
     var randomInteger = getRandomArbitrary(0, 2);
     if (randomInteger == 0) {
-        obstaclePath = "Assets/Graphics/EmptyTrash.png";
+        obstaclePath = "Assets/Graphics/Trash.png";
         obstacleSize.w = 200;
         obstacleSize.h = 200;
     }
 
     else {
-        obstaclePath = "Assets/Graphics/EmptyBuoy.png";
+        obstaclePath = "Assets/Graphics/Buoy.png";
         obstacleSize.w = 150;
         obstacleSize.h = 200;
     }
@@ -236,7 +236,7 @@ function randomObstaclePath() {
 
 }
 function randomVelocitySelector() {
-    randomVelocity = getRandomArbitrary(6, 26);
+    randomVelocity = getRandomArbitrary(15, 26);
 }
 
 randomVelocitySelector();
