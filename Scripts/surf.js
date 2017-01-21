@@ -3,6 +3,34 @@ var winW = window.innerWidth;
 var winH = window.innerHeight;
 var canvasW = winW - 50;
 var canvasH = 600;
+var characterpath = "Assets/Graphics/emptysurfer.png"
+class Character {
+
+    constructor() {
+        this.context = context;
+        this.velocity = { x: 0, y: 0 };
+        this.ready = false;
+        var startpos = canvasW / 2;
+        this.position = { x: startpos, y: 100 };
+    }
+
+    render() {
+        if (this.ready) {
+            this.context.drawImage(this.image, this.position.x, this.position.y);
+        }
+    }
+
+    setCharacterSpriteImage(image) {
+        var img = new Image();
+        var character = this;
+        img.src = image;
+        this.image = img;
+        img.onload = function () {
+            character.ready = true;
+            character.render();
+        }
+    }
+}
 
 
 class changeBlock{
@@ -27,6 +55,11 @@ class changeBlock{
 }
 
 function init(){
+	canvas = document.getElementById("main");
+	context = canvas.getContext("2d");
+	context.canvas.width = canvasW;
+	context.canvas.height = canvasH;
+
 	mainVas = document.getElementById("main");
 	mainText = mainVas.getContext("2d");
 	mainText.canvas.width = canvasW;
@@ -48,23 +81,21 @@ function init(){
 	sea = new changeBlock(backText, 0, 200, canvasW, 400);
 	sea.setColor("#0085D4")
 
-	//initialize interval
+	character = new Character();
+	character.setCharacterSpriteImage(characterpath)
+
+    //initialize interval
 	setInterval(function(){
-		mainText.clearRect(0,0,canvasW,canvasH);
+	    mainText.clearRect(0,0,canvasW,canvasH);
 		
 
 
-		console.log("tick!");
+	    console.log("tick!");
 
-		sea.render(); //draw the sea.
-
+	    sea.render(); //draw the sea.
+	    character.render();//draw the character
 	}, 1000/fps);
-	//draw the stars
+    //draw the stars
 
 }
-
-
-
-
-
-
+	
