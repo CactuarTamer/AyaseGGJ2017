@@ -32,9 +32,25 @@ class Character {
     }
 }
 
-//create obstacle class
-var obstaclePath= "Assets/Graphics/EmptyTrash.png";
+//create randomobstacle path for trash and buoy
+function getRandomArbitrary(min,max) {
+	    console.log("random");
+    return Math.random() * (max - min) + min;
+}
 
+var obstaclePath;
+
+var randomInteger = getRandomArbitrary(0,2);
+	if (randomInteger == 0){
+		obstaclePath = "Assets/Graphics/EmptyTrash.png";
+		console.log("trash");
+	}
+	else {
+		obstaclePath = "Assets/Graphics/EmptyBuoy.png";
+		console.log("buoy");
+	}
+
+//create obstacle class
 class Obstacle {
 
     constructor() {
@@ -73,7 +89,6 @@ class Obstacle {
         }
     }
 }
-
 
 class changeBlock{
 	constructor(context, xpos, ypos, width, height){
