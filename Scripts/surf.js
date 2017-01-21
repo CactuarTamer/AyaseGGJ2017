@@ -126,7 +126,21 @@ class Character {
         this.currentState = playerStates.idle;
     }
 
-    render(frame) {   
+    render(frame) {
+        var canvas = document.getElementById("main");
+        var ctx = canvas.getContext("2d");
+        if (this.currentState == playerStates.endingJump)
+        {
+            var towLineOffset = { x: 280, y: 120 };
+        }
+        else
+        {
+            var towLineOffset = { x: 300, y: 102 };
+        }
+        ctx.beginPath();
+        ctx.moveTo(this.position.x+ towLineOffset.x, this.position.y+towLineOffset.y);
+        ctx.lineTo(this.position.x + 4000, this.position.y+towLineOffset.y);
+        ctx.stroke();
         if (this.ready) {
             this.userInput();
             this.move();
