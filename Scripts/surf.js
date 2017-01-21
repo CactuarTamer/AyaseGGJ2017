@@ -2,12 +2,91 @@ var fps = 30; //frames per second for animating things
 var winW = window.innerWidth;
 var winH = window.innerHeight;
 var canvasW = winW - 50;
-var canvasH = 600;
+var canvasH = 700;
+var horizon = 250;
+
+
+var nightSky = [{stopPlace:0, r:13,g:4,b:65},
+				{stopPlace:0.2, r:13,g:4,b:65},
+				{stopPlace:0.8, r:86,g:28,b:145},
+				{stopPlace:1, r:128,g:67,b:161}];
+
+var nightSea = [{stopPlace:0, r:0,g:0,b:0},
+				{stopPlace:0.2, r:0,g:0,b:0},
+				{stopPlace:0.8, r:13,g:4,b:65},
+				{stopPlace:1, r:13,g:4,b:65}];	
+
+var sunsetSky = [{stopPlace:0, r:13,g:4,b:65},
+				{stopPlace:0.2,   r:242,g:0,b:73},
+				{stopPlace:0.6, r:225,g:116,b:0},
+				{stopPlace:1, r:225,g:218,b:0}];
+
+var sunsetSea = [{stopPlace:0, r:9,g:114,b:223},
+				{stopPlace:0.8,r:13,g:4,b:65},
+				{stopPlace:1, r:13,g:4,b:65}];
+
+var sunriseSky = [{stopPlace:0, r:178,g:246,b:225},
+				{stopPlace:0.4,  r:225,g:228,b:100},
+				{stopPlace:0.5, r:225,g:228,b:100},
+				{stopPlace:1, r:225,g:0,b:103}];
+
+var sunriseSea = [{stopPlace:0,  r:178,g:246,b:225},
+				{stopPlace:0.8, r:9,g:114,b:223},
+				{stopPlace:1,r:9,g:114,b:223}];
+
+var daytimeSky = [{stopPlace:0, r:117,g:224,b:254},
+				{stopPlace:0.2, r:117,g:224,b:254},
+				{stopPlace:0.6, r:40,g:148,b:218},
+				{stopPlace:1, r:40,g:148,b:218}];
+
+var daytimeSea = [{stopPlace:0, r:13,g:4,b:65},
+				{stopPlace:0.8,r:9,g:114,b:223},
+				{stopPlace:1, r:0,g:75,b:235}];
+
+var dayStates = {
+			
+			day: {
+				sky:daytimeSky,
+				sea:daytimeSea
+			},
+			night: {
+				sky:nightSky,
+				sea:nightSea
+			},
+			sunrise: {
+				sky:sunriseSky,
+				sea:sunriseSea
+			},
+			sunset: {
+				sky:sunsetSky,
+				sea:sunsetSea
+			}
+}
+var dayState = dayStates.day;
+function changeDayState(){
+	if(dayState == dayStates.day){
+		dayState = dayStates.sunset;
+	}else if(dayState == dayStates.sunset){
+		dayState = dayStates.night;
+	}else if(dayState == dayStates.night){
+		dayState = dayStates.sunrise;
+	}else if(dayState == dayStates.sunrise){
+		dayState = dayStates.day;
+	}else{
+		console.log("something went wrong!");
+	}
+}
+
+//console.log(dayStates);
+
+
+
 var characterpath = "Assets/Graphics/emptysurfer.png";
 var gravity = 10;
 var wavePushback = 5;
 var basePosition = 100;
 var xPositionLimit = canvasW - (canvasW / 4);
+
 class Character {
 
     constructor() {
@@ -92,15 +171,29 @@ class changeBlock{
 		this.size = {h: height, w:width}
 		this.ready = true;
 		this.color = "#000";
+
+		//set gradient
+		this.gradient = this.context.createLinearGradient(0,0,0,this.size.h+50);
+
+
 	}
 
 	setColor(rgb){
 		this.color = rgb;
 	}
 
+	setGradient(gradient){
+		this.gradient = this.context.createLinearGradient(0,0,0,this.size.h+50);
+		for(var i = 0; i<gradient.length; i++){
+			this.gradient.addColorStop(gradient[i].stopPlace, 'rgb('+gradient[i].r+','+gradient[i].g+','+gradient[i].b+')');
+		}
+	}
+
+
+
 	render(){
 		if(this.ready){
-			this.context.fillStyle = this.color;
+			this.context.fillStyle = this.gradient;
 			this.context.fillRect(this.pos.x, this.pos.y, this.size.w, this.size.h);	
 		}
 	}
@@ -128,21 +221,37 @@ function init(){
 	backText.canvas.width = canvasW;
 	backText.canvas.height = canvasH;
 
-	sea = new changeBlock(backText, 0, 200, canvasW, 400);
-	sea.setColor("#0085D4")
+
+
+	sky = new changeBlock(skyText, 0, 0, canvasW, horizon)
+	sea = new changeBlock(backText, 0, horizon, canvasW, canvasH-horizon);
+	//sea.setColor("#0085D4");
+	sea.setGradient(dayState.sea);
+	sky.setGradient(dayState.sky);
+
 
 	character = new Character();
 	character.setCharacterSpriteImage(characterpath)
-
+	var daytick = 0;
     //initialize interval
 	setInterval(function(){
 	    mainText.clearRect(0,0,canvasW,canvasH);
+	    skyText.clearRect(0,0,canvasW,canvasH);
+	    backText.clearRect(0,0,canvasW,canvasH);
 		
+	    daytick++;
+	    if(daytick >= 150){
+	    	changeDayState();   	
+			sea.setGradient(dayState.sea);
+			sky.setGradient(dayState.sky);
+			daytick = 0;
+	    }
 
 
 	    console.log("tick!");
 
 	    sea.render(); //draw the sea.
+	    sky.render(); //draw the sea.
 	    character.render();//draw the character
 	}, 1000/fps);
     //draw the stars
