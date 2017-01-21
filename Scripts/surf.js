@@ -5,6 +5,9 @@ var canvasW = winW - 50;
 var canvasH = 700;
 var horizon = 250;
 
+var playerAnimationTick = 0;
+var playerAnimationFrame = 0;
+
 
 var nightSky = [{stopPlace:0, r:13,g:4,b:65},
 				{stopPlace:0.2, r:13,g:4,b:65},
@@ -77,7 +80,7 @@ function changeDayState(){
 	}
 }
 
-var playerStates = {idle: 1, jumping: 2, blocking: 3}
+var playerStates = {idle: 1, jumping: 2, blocking: 3, endingJump: 4}
 
 function spawnSeagull() {
     seagull = new SeaGull();
@@ -88,15 +91,16 @@ function spawnSeagull() {
 
 
 var characterpath = "Assets/Graphics/chara1_idle-";
+var characterJumpPath = "Assets/Graphics/chara1_jump-";
 var seagullpath = "Assets/Graphics/emptyseagull.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
 var obstacleSize = {h: 200, w: 200}
-var gravity = 10;
+var gravity = 8;
 var wavePushback = 5;
-var basePosition = 100;
+var basePosition = 200;
 var xPositionLimit = canvasW - (canvasW / 4);
 var randomVelocity;
-var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp3');
+var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp');
 
 //audio settings
 audio.loop = true;
@@ -109,22 +113,29 @@ class Character {
         this.ready = false;
         this.jumping = false;
         this.startpos = (canvasW / 2) - (canvasW / 4);
-        this.position = { x: this.startpos, y: 100 };
-        this.jumpingPower = 100;
+        this.position = { x: this.startpos, y: 200 };
+        this.jumpingPower = 75;
         this.img = [new Image(), new Image()];
+        this.imgJump = [new Image(), new Image()];
         this.currentState = playerStates.idle;
     }
 
-    render(frame) {
+    render(frame) {   
         if (this.ready) {
             this.userInput();
             this.move();
-            this.context.drawImage(this.img[frame], this.position.x, this.position.y);
+            if (this.currentState == playerStates.idle || this.currentState == playerStates.blocking) {
+                this.context.drawImage(this.img[frame], this.position.x, this.position.y);
+            }
+            else if (this.currentState == playerStates.jumping || this.currentState == playerStates.endingJump)
+            {
+                this.context.drawImage(this.imgJump[frame], this.position.x, this.position.y);
+            }
         }
     }
 
     checkCollision(object, isBlockable) {
-        var rect1 = { x: this.position.x, y: this.position.y, width: 300, height: 400 };
+        var rect1 = { x: this.position.x, y: this.position.y, width: 300, height: 200 };
         var rect2 = { x: object.position.x, y: object.position.y, width: object.width, height: object.height };
 
         if (this.currentState == playerStates.blocking && isBlockable &&
@@ -147,8 +158,12 @@ class Character {
     setCharacterSpriteImage(image) {
         var character = this;
         for (var i = 1; i <= 2 ; i++) {
-            this.img[i-1].src = image + i + ".png";
+            this.img[i-1].src = characterpath + i + ".png";
         }
+        for (var i = 2; i <= 3 ; i++) {
+            this.imgJump[i - 2].src = characterJumpPath + i + ".png";
+        }
+        console.log(this.impJump);
         this.image = this.img[0];
         this.img[0].onload = function () {
             character.ready = true;
@@ -165,12 +180,14 @@ class Character {
                     if(character.currentState != playerStates.jumping) {
                         character.currentState = playerStates.jumping;
                         character.velocity.y = character.jumpingPower;
-                        character.velocity.x = character.jumpingPower/10;
+                        character.velocity.x = character.jumpingPower / 10;
+                        playerAnimationFrame = 0;
+                        playerAnimationTick = 0;
                     }
                     break;
                 case 16:
                    if (character.currentState != playerStates.jumping) {
-                        character.currentState = playerStates.blocking;
+                       character.currentState = playerStates.blocking;
                     }
                     break;
             }
@@ -195,11 +212,11 @@ class Character {
         }
 
         //clamp character position to the ground
-        if (this.position.y > 100)
+        if (this.position.y > basePosition)
         {
-            this.position.y = 100;
-            if (this.currentState != playerStates.blocking) {
-                this.currentState = playerStates.idle;
+            this.position.y = basePosition;
+            if (this.currentState == playerStates.jumping) {
+                this.currentState = playerStates.endingJump;
             }
         }
 
@@ -207,6 +224,9 @@ class Character {
         if (this.position.x < this.startpos)
         {
             this.position.x = this.startpos;
+            if (this.currentState == playerStates.endingJump) {
+                this.currentState = playerStates.idle;
+            }
         }
         if(this.position.x > xPositionLimit)
         {
@@ -396,14 +416,17 @@ function init(){
 
 
 	character = new Character();
-	character.setCharacterSpriteImage(characterpath);
+	if (character.currentState == playerStates.idle || character.currentState == playerStates.blocking) {
+	    character.setCharacterSpriteImage(characterpath);
+	}
+	else if (character.currentState == playerStates.jumping) {
+	    character.setCharacterSpriteImage(characterJumpPath);
+	}
 	obstacle = new Obstacle();
 	obstacle.setObstacleSpriteImage(obstaclePath);
 	spawnSeagull();
 	var daytick = 0;
 	var seagulltick = Math.random() * (300 - 0) + 0;
-	var playerAnimationTick = 0;
-	var playerAnimationFrame = 0;
 	audio.play();
     //initialize interval
 	setInterval(function(){
@@ -424,14 +447,18 @@ function init(){
 	        spawnSeagull();
 	        seagulltick = Math.random() * (300 - 0) + 0;
 	    }
-	    if (playerAnimationTick >= fps/4)
-	    {
+	    if (playerAnimationTick >= fps / 4 && character.currentState == playerStates.idle) {
 	        playerAnimationFrame++
-	        if(playerAnimationFrame > 1)
-	        {
+	        if (playerAnimationFrame > 1) {
 	            playerAnimationFrame = 0;
 	        }
 	        playerAnimationTick = 0;
+	    }
+	    else if (character.currentState == playerStates.jumping) {
+	        playerAnimationFrame = 0;
+	    }
+	    else if (character.currentState == playerStates.endingJump) {
+	        playerAnimationFrame = 1;
 	    }
 
 	    if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
@@ -442,7 +469,7 @@ function init(){
 	        obstacle.setObstacleSpriteImage(obstaclePath);
 
 	    }
-	   // console.log("tick!");
+	    // console.log("tick!");
 	    character.checkCollision(obstacle, false);
 	    character.checkCollision(seagull, true);
 	    sea.render(); //draw the sea.
