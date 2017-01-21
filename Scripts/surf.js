@@ -4,6 +4,7 @@ var winH = window.innerHeight;
 var canvasW = winW - 50;
 var canvasH = 600;
 var characterpath = "Assets/Graphics/emptysurfer.png"
+var obstaclePath;
 class Character {
 
     constructor() {
@@ -34,31 +35,31 @@ class Character {
 
 //create randomobstacle path for trash and buoy
 function getRandomArbitrary(min,max) {
-	    console.log("random");
-    return Math.random() * (max - min) + min;
+    return Math.floor(Math.random() * (max - min) + min);
 }
 
-var obstaclePath;
+function randomObstaclePath(){
 
 var randomInteger = getRandomArbitrary(0,2);
+console.log(randomInteger);
 	if (randomInteger == 0){
-		obstaclePath = "Assets/Graphics/EmptyTrash.png";
-		console.log("trash");
-	}
+		obstaclePath =  "Assets/Graphics/EmptyTrash.png";
+		}
+
 	else {
 		obstaclePath = "Assets/Graphics/EmptyBuoy.png";
-		console.log("buoy");
 	}
+}
 
 //create obstacle class
 class Obstacle {
 
     constructor() {
         this.context = context;
-        this.velocity = { x: -1, y: 0 };
+        this.velocity = { x: -10, y: 0 };
         this.ready = false;
         var startpos = canvasW - 200; //need to randomise Y 
-        this.position = { x: startpos, y: 100 };
+        this.position = { x: startpos, y: canvasH - 300 };
     }
 
     render() {
@@ -110,6 +111,7 @@ class changeBlock{
 		}
 	}
 }
+var obstacleOffScreen;
 
 function init(){
 	canvas = document.getElementById("main");
@@ -132,8 +134,6 @@ function init(){
 	backText = backVas.getContext("2d");
 	backText.canvas.width = canvasW;
 	backText.canvas.height = canvasH;
-
-
 	
 	sea = new changeBlock(backText, 0, 200, canvasW, 400);
 	sea.setColor("#0085D4")
@@ -152,8 +152,19 @@ function init(){
 	    sea.render(); //draw the sea.
 	    character.render();//draw the character
 		obstacle.render();//draw the obstacle
+
+		//spawn new rock if obstacle has gone off screen	
+
+		if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
+		{
+			obstacle = new Obstacle();
+			randomObstaclePath();
+			obstacle.setObstacleSpriteImage(obstaclePath);
+
+   		 	}
 		}, 1000/fps);
-    //draw the stars
+
+
 
 }
 	
