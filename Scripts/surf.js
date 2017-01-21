@@ -77,6 +77,8 @@ function changeDayState(){
 	}
 }
 
+var playerStates = {idle: 1, jumping: 2, blocking: 3}
+
 function spawnSeagull() {
     seagull = new SeaGull();
     seagull.setSeagullSpriteImage(seagullpath)
@@ -87,7 +89,8 @@ function spawnSeagull() {
 
 var characterpath = "Assets/Graphics/chara1_idle-";
 var seagullpath = "Assets/Graphics/emptyseagull.png";
-var obstaclePath;
+var obstaclePath = "Assets/Graphics/Trash.png";
+var obstacleSize = {h: 200, w: 200}
 var gravity = 10;
 var wavePushback = 5;
 var basePosition = 100;
@@ -109,6 +112,7 @@ class Character {
         this.position = { x: this.startpos, y: 100 };
         this.jumpingPower = 100;
         this.img = [new Image(), new Image()];
+        this.currentState = playerStates.idle;
     }
 
     render(frame) {
@@ -116,6 +120,27 @@ class Character {
             this.userInput();
             this.move();
             this.context.drawImage(this.img[frame], this.position.x, this.position.y);
+        }
+    }
+
+    checkCollision(object, isBlockable) {
+        var rect1 = { x: this.position.x, y: this.position.y, width: 300, height: 400 };
+        var rect2 = { x: object.position.x, y: object.position.y, width: object.width, height: object.height };
+
+        if (this.currentState == playerStates.blocking && isBlockable &&
+            rect1.x < rect2.x + rect2.width &&
+            rect1.x + rect1.width > rect2.x &&
+            rect1.y < rect2.y + rect2.height &&
+            rect1.height + rect1.y > rect2.y) {
+            object.dead = true;
+        }
+        else {
+            if (rect1.x < rect2.x + rect2.width &&
+            rect1.x + rect1.width > rect2.x &&
+            rect1.y < rect2.y + rect2.height &&
+            rect1.height + rect1.y > rect2.y)
+            {
+            }
         }
     }
 
@@ -137,12 +162,24 @@ class Character {
             switch(e.which)
             {
                 case 32:
-                    if (character.jumping == false) {
-                        character.jumping = true;
+                    if(character.currentState != playerStates.jumping) {
+                        character.currentState = playerStates.jumping;
                         character.velocity.y = character.jumpingPower;
                         character.velocity.x = character.jumpingPower/10;
                     }
                     break;
+                case 16:
+                   if (character.currentState != playerStates.jumping) {
+                        character.currentState = playerStates.blocking;
+                    }
+                    break;
+            }
+        })
+        $(document.body).on('keyup', function (e) {
+            switch (e.which)  
+            {
+                case 16:
+                    character.currentState = playerStates.idle;
             }
         })
     }
@@ -152,7 +189,7 @@ class Character {
         this.position.y -= this.velocity.y;
         this.velocity.y -= gravity;
         this.position.x += this.velocity.x;
-        if (this.jumping == false)
+        if (this.currentState != playerStates.jumping)
         {
             this.velocity.x -= wavePushback//push back when on the ground
         }
@@ -161,7 +198,9 @@ class Character {
         if (this.position.y > 100)
         {
             this.position.y = 100;
-            this.jumping = false;
+            if (this.currentState != playerStates.blocking) {
+                this.currentState = playerStates.idle;
+            }
         }
 
         //clamp x position to world
@@ -183,17 +222,21 @@ function getRandomArbitrary(min, max) {
 function randomObstaclePath() {
     var randomInteger = getRandomArbitrary(0, 2);
     if (randomInteger == 0) {
-        obstaclePath = "Assets/Graphics/EmptyTrash.png";
+        obstaclePath = "Assets/Graphics/Trash.png";
+        obstacleSize.w = 200;
+        obstacleSize.h = 200;
     }
 
     else {
-        obstaclePath = "Assets/Graphics/EmptyBuoy.png";
+        obstaclePath = "Assets/Graphics/Buoy.png";
+        obstacleSize.w = 150;
+        obstacleSize.h = 200;
     }
     //randomise velocity
 
 }
 function randomVelocitySelector() {
-    randomVelocity = getRandomArbitrary(6, 26);
+    randomVelocity = getRandomArbitrary(15, 26);
 }
 
 randomVelocitySelector();
@@ -207,6 +250,8 @@ class Obstacle {
         this.ready = false;
         var startpos = canvasW; //need to randomise Y 
         this.position = { x: startpos, y: canvasH - 300 };
+        this.width = obstacleSize.w;
+        this.height = obstacleSize.h;
     }
 
     render() {
@@ -250,10 +295,18 @@ class SeaGull {
         this.normalizedVector = { x: this.directionVector.x / this.directionVectorLength, y: this.directionVector.y / this.directionVectorLength };
         this.velocity = { x: this.normalizedVector.x * 10, y: (this.normalizedVector.y * 10) };
         this.position = { x: this.startpos.x, y: 0};
+        this.width = 100;
+        this.height = 50;
+        this.dead = false;
+        this.flicker = 0;
     }
 
     render() {
-        if (this.ready) {
+        if (this.dead)
+        {
+           this.flicker++
+        }
+        if (this.ready && this.flicker % 2 == 0 && this.flicker < 100) {
             this.move();
             this.context.drawImage(this.image, this.position.x, this.position.y);
         }
@@ -343,8 +396,9 @@ function init(){
 
 
 	character = new Character();
-	character.setCharacterSpriteImage(characterpath)
+	character.setCharacterSpriteImage(characterpath);
 	obstacle = new Obstacle();
+	obstacle.setObstacleSpriteImage(obstaclePath);
 	spawnSeagull();
 	var daytick = 0;
 	var seagulltick = Math.random() * (300 - 0) + 0;
@@ -389,7 +443,8 @@ function init(){
 
 	    }
 	   // console.log("tick!");
-
+	    character.checkCollision(obstacle, false);
+	    character.checkCollision(seagull, true);
 	    sea.render(); //draw the sea.
 	    sky.render(); //draw the sea.
 	    obstacle.render();//draw the obstacle
