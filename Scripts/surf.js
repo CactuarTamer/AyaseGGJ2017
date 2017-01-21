@@ -84,7 +84,12 @@ var playerStates = {idle: 1, jumping: 2, blocking: 3, endingJump: 4}
 
 function spawnSeagull() {
     seagull = new SeaGull();
-    seagull.setSeagullSpriteImage(seagullpath)
+    if (Math.floor((Math.random() * (10 - 0) + 0)) == 5) {
+        seagull.setSeagullSpriteImage(spazzySeagullpath)
+    }
+    else {
+        seagull.setSeagullSpriteImage(seagullpath)
+    }
 }
 //console.log(dayStates);
 
@@ -92,7 +97,8 @@ function spawnSeagull() {
 
 var characterpath = "Assets/Graphics/chara1_idle-";
 var characterJumpPath = "Assets/Graphics/chara1_jump-";
-var seagullpath = "Assets/Graphics/emptyseagull.png";
+var seagullpath = "Assets/Graphics/Seagull.png";
+var spazzySeagullpath = "Assets/Graphics/Spazzy.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
 var obstacleSize = {h: 200, w: 200}
 var gravity = 8;
@@ -326,7 +332,7 @@ class SeaGull {
         {
            this.flicker++
         }
-        if (this.ready && this.flicker % 2 == 0 && this.flicker < 100) {
+        if (this.ready && this.flicker % 2 == 0 && this.flicker < 50) {
             this.move();
             this.context.drawImage(this.image, this.position.x, this.position.y);
         }
