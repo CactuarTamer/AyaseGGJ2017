@@ -96,6 +96,10 @@ var wavePushback = 5;
 var basePosition = 100;
 var xPositionLimit = canvasW - (canvasW / 4);
 var randomVelocity;
+var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp3');
+
+//audio settings
+audio.loop = true;
 
 class Character {
 
@@ -400,6 +404,7 @@ function init(){
 	var seagulltick = Math.random() * (300 - 0) + 0;
 	var playerAnimationTick = 0;
 	var playerAnimationFrame = 0;
+	audio.play();
     //initialize interval
 	setInterval(function(){
 	    mainText.clearRect(0,0,canvasW,canvasH);
