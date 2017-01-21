@@ -80,7 +80,8 @@ function changeDayState(){
 	}
 }
 
-var playerStates = {idle: 1, jumping: 2, blocking: 3, endingJump: 4}
+var playerStates = { idle: 1, jumping: 2, blocking: 3, endingJump: 4 }
+var gameStates = {start: 1, game: 2, end: 3}
 
 function spawnSeagull() {
     seagull = new SeaGull();
@@ -100,6 +101,7 @@ var characterJumpPath = "Assets/Graphics/chara1_jump-";
 var seagullpath = "Assets/Graphics/Seagull.png";
 var spazzySeagullpath = "Assets/Graphics/Spazzy.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
+var startMenuPath = "Assets/Graphics/StartScreen.png";
 var obstacleSize = {h: 200, w: 200}
 var gravity = 8;
 var wavePushback = 5;
@@ -107,6 +109,7 @@ var basePosition = 200;
 var xPositionLimit = canvasW - (canvasW / 4);
 var randomVelocity;
 var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp');
+var currentGameState = gameStates.start;
 
 //audio settings
 audio.loop = true;
@@ -323,6 +326,34 @@ class Obstacle {
     }
 }
 
+class StartMenu {
+    constructor() {
+        this.context = context;
+        this.ready = false;
+        document.getElementById('main').addEventListener('click', function (e) {
+            currentGameState = gameStates.game;
+            console.log("clicked");
+        }, false);
+    }
+
+    render() {
+        if (this.ready) {
+            this.context.drawImage(this.image, 0, 0);
+        }
+    }
+
+    setMenuImage() {
+        var img = new Image();
+        var menu = this;
+        img.src = startMenuPath;
+        this.image = img;
+        img.onload = function () {
+            menu.ready = true;
+            menu.render();
+        }
+    }
+}
+
 class SeaGull {
     constructor() {
         this.context = context;
@@ -433,7 +464,8 @@ function init(){
 	//sea.setColor("#0085D4");
 	sea.setGradient(dayState.sea);
 	sky.setGradient(dayState.sky);
-
+	startMenu = new StartMenu();
+	startMenu.setMenuImage();
 
 	character = new Character();
 	if (character.currentState == playerStates.idle || character.currentState == playerStates.blocking) {
@@ -449,54 +481,67 @@ function init(){
 	var seagulltick = Math.random() * (300 - 0) + 0;
 	audio.play();
     //initialize interval
-	setInterval(function(){
-	    mainText.clearRect(0,0,canvasW,canvasH);
-	    skyText.clearRect(0,0,canvasW,canvasH);
-	    backText.clearRect(0,0,canvasW,canvasH);
-	    daytick++;
-	    seagulltick++
-	    playerAnimationTick++;
-	    if(daytick >= 150){
-	    	changeDayState();   	
-			sea.setGradient(dayState.sea);
-			sky.setGradient(dayState.sky);
-			daytick = 0;
+	setInterval(function () {
+	    //ALL STATES
+	    mainText.clearRect(0, 0, canvasW, canvasH);
+	    skyText.clearRect(0, 0, canvasW, canvasH);
+	    backText.clearRect(0, 0, canvasW, canvasH);
+
+	    //START MENU STATE
+	    if (currentGameState == gameStates.start)
+	    {
+	        startMenu.render();
+	        sea.render(); //draw the sea.
+	        sky.render(); //draw the sea.
 	    }
-	    if (seagulltick >= 500) {
-	        delete (seagull);
-	        spawnSeagull();
-	        seagulltick = Math.random() * (300 - 0) + 0;
-	    }
-	    if (playerAnimationTick >= fps / 4 && character.currentState == playerStates.idle) {
-	        playerAnimationFrame++
-	        if (playerAnimationFrame > 1) {
+	    //GAME STATE
+	    if (currentGameState == gameStates.game) {
+	        daytick++;
+	        seagulltick++
+	        playerAnimationTick++;
+	        if (daytick >= 150) {
+	            changeDayState();
+	            sea.setGradient(dayState.sea);
+	            sky.setGradient(dayState.sky);
+	            daytick = 0;
+	        }
+	        if (seagulltick >= 500) {
+	            delete (seagull);
+	            spawnSeagull();
+	            seagulltick = Math.random() * (300 - 0) + 0;
+	        }
+	        if (playerAnimationTick >= fps / 4 && character.currentState == playerStates.idle) {
+	            playerAnimationFrame++
+	            if (playerAnimationFrame > 1) {
+	                playerAnimationFrame = 0;
+	            }
+	            playerAnimationTick = 0;
+	        }
+	        else if (character.currentState == playerStates.jumping) {
 	            playerAnimationFrame = 0;
 	        }
-	        playerAnimationTick = 0;
-	    }
-	    else if (character.currentState == playerStates.jumping) {
-	        playerAnimationFrame = 0;
-	    }
-	    else if (character.currentState == playerStates.endingJump) {
-	        playerAnimationFrame = 1;
-	    }
+	        else if (character.currentState == playerStates.endingJump) {
+	            playerAnimationFrame = 1;
+	        }
 
-	    if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
-	    {
-	        randomVelocitySelector();
-	        obstacle = new Obstacle();
-	        randomObstaclePath();
-	        obstacle.setObstacleSpriteImage(obstaclePath);
+	        if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
+	        {
+	            randomVelocitySelector();
+	            obstacle = new Obstacle();
+	            randomObstaclePath();
+	            obstacle.setObstacleSpriteImage(obstaclePath);
 
+	        }
+	        // console.log("tick!");
+	        character.checkCollision(obstacle, false);
+	        character.checkCollision(seagull, true);
+	        sea.render(); //draw the sea.
+	        sky.render(); //draw the sea.
+	        obstacle.render();//draw the obstacle
+	        character.render(playerAnimationFrame);//draw the character
+	        seagull.render();
 	    }
-	    // console.log("tick!");
-	    character.checkCollision(obstacle, false);
-	    character.checkCollision(seagull, true);
-	    sea.render(); //draw the sea.
-	    sky.render(); //draw the sea.
-	    obstacle.render();//draw the obstacle
-	    character.render(playerAnimationFrame);//draw the character
-	    seagull.render();
+        //END GAME STATE
 	}, 1000/fps);
     //draw the stars
 
