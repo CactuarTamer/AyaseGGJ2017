@@ -87,10 +87,12 @@ function spawnSeagull() {
 
 var characterpath = "Assets/Graphics/chara1_idle-";
 var seagullpath = "Assets/Graphics/emptyseagull.png";
+var obstaclePath;
 var gravity = 10;
 var wavePushback = 5;
 var basePosition = 100;
 var xPositionLimit = canvasW - (canvasW / 4);
+var randomVelocity;
 
 class Character {
 
@@ -110,7 +112,6 @@ class Character {
             this.userInput();
             this.move();
             this.context.drawImage(this.img[frame], this.position.x, this.position.y);
-            console.log(frame);
         }
     }
 
@@ -167,6 +168,68 @@ class Character {
         if(this.position.x > xPositionLimit)
         {
             this.position.x = xPositionLimit;
+        }
+    }
+}
+
+function getRandomArbitrary(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+function randomObstaclePath() {
+    var randomInteger = getRandomArbitrary(0, 2);
+    if (randomInteger == 0) {
+        obstaclePath = "Assets/Graphics/EmptyTrash.png";
+    }
+
+    else {
+        obstaclePath = "Assets/Graphics/EmptyBuoy.png";
+    }
+    //randomise velocity
+
+}
+function randomVelocitySelector() {
+    randomVelocity = getRandomArbitrary(6, 26);
+}
+
+randomVelocitySelector();
+
+//create obstacle class
+class Obstacle {
+
+    constructor() {
+        this.context = context;
+        this.velocity = { x: randomVelocity * -1, y: 0 };
+        this.ready = false;
+        var startpos = canvasW; //need to randomise Y 
+        this.position = { x: startpos, y: canvasH - 300 };
+    }
+
+    render() {
+        if (this.ready) {
+            this.context.drawImage(this.image, this.position.x, this.position.y);
+        }
+
+        //function to make obstacles go left
+        this.goLeft();
+    }
+
+
+
+    goLeft() {
+        this.position.x += this.velocity.x;
+    }
+
+
+    setObstacleSpriteImage(image) {
+        var img = new Image();
+        var obstacle = this;
+        img.src = image;
+        this.image = img;
+
+        img.onload = function () {
+            obstacle.ready = true;
+            obstacle.render();
         }
     }
 }
@@ -258,7 +321,6 @@ function init(){
 
 	skyVas = document.getElementById("sky");
 	skyText = skyVas.getContext("2d");
-	console.log(skyText);
 	skyText.canvas.width = canvasW;
 	skyText.canvas.height = canvasH;
 
@@ -278,6 +340,7 @@ function init(){
 
 	character = new Character();
 	character.setCharacterSpriteImage(characterpath)
+	obstacle = new Obstacle();
 	spawnSeagull();
 	var daytick = 0;
 	var seagulltick = Math.random() * (300 - 0) + 0;
@@ -307,15 +370,24 @@ function init(){
 	        playerAnimationFrame++
 	        if(playerAnimationFrame > 1)
 	        {
-	            console.log("reset");
 	            playerAnimationFrame = 0;
 	        }
 	        playerAnimationTick = 0;
 	    }
-	    console.log("tick!");
+
+	    if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
+	    {
+	        randomVelocitySelector();
+	        obstacle = new Obstacle();
+	        randomObstaclePath();
+	        obstacle.setObstacleSpriteImage(obstaclePath);
+
+	    }
+	   // console.log("tick!");
 
 	    sea.render(); //draw the sea.
 	    sky.render(); //draw the sea.
+	    obstacle.render();//draw the obstacle
 	    character.render(playerAnimationFrame);//draw the character
 	    seagull.render();
 	}, 1000/fps);
