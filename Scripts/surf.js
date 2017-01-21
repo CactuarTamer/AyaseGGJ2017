@@ -3,19 +3,26 @@ var winW = window.innerWidth;
 var winH = window.innerHeight;
 var canvasW = winW - 50;
 var canvasH = 600;
-var characterpath = "Assets/Graphics/emptysurfer.png"
+var characterpath = "Assets/Graphics/emptysurfer.png";
+var jumping = false;
+var gravity = 10;
+var jumpingPower = -100;
+var basePosition = 100;
 class Character {
 
     constructor() {
         this.context = context;
         this.velocity = { x: 0, y: 0 };
         this.ready = false;
+        this.jumping = false;
         var startpos = canvasW / 2;
         this.position = { x: startpos, y: 100 };
     }
 
     render() {
         if (this.ready) {
+            this.userInput();
+            this.move();
             this.context.drawImage(this.image, this.position.x, this.position.y);
         }
     }
@@ -29,6 +36,32 @@ class Character {
             character.ready = true;
             character.render();
         }
+    }
+
+    userInput() {
+        var character = this;
+        $(document.body).on('keydown', function (e) {
+            switch(e.which)
+            {
+                case 32:
+                    if (character.jumping == false) {
+                        character.jumping = true;
+                        character.velocity.y = jumpingPower;
+                    }
+                    break;
+            }
+        })
+    }
+
+    move() {
+        this.position.y += this.velocity.y;
+        this.velocity.y += gravity;
+        if (this.position.y > 100)
+        {
+            this.position.y = 100;
+            this.jumping = false;
+        }
+        console.log(this.velocity.y);
     }
 }
 
@@ -76,8 +109,6 @@ function init(){
 	backText.canvas.width = canvasW;
 	backText.canvas.height = canvasH;
 
-
-	
 	sea = new changeBlock(backText, 0, 200, canvasW, 400);
 	sea.setColor("#0085D4")
 
