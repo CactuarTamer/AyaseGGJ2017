@@ -5,6 +5,7 @@ var canvasW = winW - 50;
 var canvasH = 600;
 var characterpath = "Assets/Graphics/emptysurfer.png"
 var obstaclePath;
+var randomVelocity
 class Character {
 
     constructor() {
@@ -41,7 +42,6 @@ function getRandomArbitrary(min,max) {
 function randomObstaclePath(){
 
 var randomInteger = getRandomArbitrary(0,2);
-console.log(randomInteger);
 	if (randomInteger == 0){
 		obstaclePath =  "Assets/Graphics/EmptyTrash.png";
 		}
@@ -49,16 +49,24 @@ console.log(randomInteger);
 	else {
 		obstaclePath = "Assets/Graphics/EmptyBuoy.png";
 	}
-}
+//randomise velocity
 
-//create obstacle class
+}
+	function randomVelocitySelector(){
+		randomVelocity = getRandomArbitrary(6,26);
+		console.log("velocity: " + randomVelocity);
+	}
+
+	randomVelocitySelector();
+	
+	//create obstacle class
 class Obstacle {
 
     constructor() {
         this.context = context;
-        this.velocity = { x: -10, y: 0 };
+        this.velocity = { x: randomVelocity * -1, y: 0 };
         this.ready = false;
-        var startpos = canvasW - 200; //need to randomise Y 
+        var startpos = canvasW; //need to randomise Y 
         this.position = { x: startpos, y: canvasH - 300 };
     }
 
@@ -69,11 +77,12 @@ class Obstacle {
         
     //function to make obstacles go left
 	this.goLeft();
-    }
+    }    
+
+	
 
     goLeft(){
 		this.position.x += this.velocity.x;
-		console.log("goleft called")
 		}
 
 
@@ -157,6 +166,8 @@ function init(){
 
 		if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
 		{
+			randomVelocitySelector();
+			console.log("New velocity: " + randomVelocity);
 			obstacle = new Obstacle();
 			randomObstaclePath();
 			obstacle.setObstacleSpriteImage(obstaclePath);
