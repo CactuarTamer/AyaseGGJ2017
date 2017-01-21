@@ -4,10 +4,10 @@ var winH = window.innerHeight;
 var canvasW = winW - 50;
 var canvasH = 600;
 var characterpath = "Assets/Graphics/emptysurfer.png";
-var jumping = false;
 var gravity = 10;
-var jumpingPower = -100;
+var wavePushback = 5;
 var basePosition = 100;
+var xPositionLimit = canvasW - (canvasW / 4);
 class Character {
 
     constructor() {
@@ -15,8 +15,9 @@ class Character {
         this.velocity = { x: 0, y: 0 };
         this.ready = false;
         this.jumping = false;
-        var startpos = canvasW / 2;
-        this.position = { x: startpos, y: 100 };
+        this.startpos = (canvasW / 2) - (canvasW / 4);
+        this.position = { x: this.startpos, y: 100 };
+        this.jumpingPower = 100;
     }
 
     render() {
@@ -46,7 +47,8 @@ class Character {
                 case 32:
                     if (character.jumping == false) {
                         character.jumping = true;
-                        character.velocity.y = jumpingPower;
+                        character.velocity.y = character.jumpingPower;
+                        character.velocity.x = character.jumpingPower/10;
                     }
                     break;
             }
@@ -54,14 +56,31 @@ class Character {
     }
 
     move() {
-        this.position.y += this.velocity.y;
-        this.velocity.y += gravity;
+        //Update position and current velocity
+        this.position.y -= this.velocity.y;
+        this.velocity.y -= gravity;
+        this.position.x += this.velocity.x;
+        if (this.jumping == false)
+        {
+            this.velocity.x -= wavePushback//push back when on the ground
+        }
+
+        //clamp character position to the ground
         if (this.position.y > 100)
         {
             this.position.y = 100;
             this.jumping = false;
         }
-        console.log(this.velocity.y);
+
+        //clamp x position to world
+        if (this.position.x < this.startpos)
+        {
+            this.position.x = this.startpos;
+        }
+        if(this.position.x > xPositionLimit)
+        {
+            this.position.x = xPositionLimit;
+        }
     }
 }
 
