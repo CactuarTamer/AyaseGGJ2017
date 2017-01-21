@@ -98,6 +98,7 @@ function spawnSeagull() {
 
 var characterpath = "Assets/Graphics/chara1_idle-";
 var characterJumpPath = "Assets/Graphics/chara1_jump-";
+var characterBlockPath = "Assets/Graphics/chara1_block-";
 var seagullpath = "Assets/Graphics/Seagull.png";
 var spazzySeagullpath = "Assets/Graphics/Spazzy.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
@@ -126,6 +127,7 @@ class Character {
         this.jumpingPower = 75;
         this.img = [new Image(), new Image()];
         this.imgJump = [new Image(), new Image()];
+        this.imgBlock = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()];
         this.currentState = playerStates.idle;
     }
 
@@ -147,12 +149,16 @@ class Character {
         if (this.ready) {
             this.userInput();
             this.move();
-            if (this.currentState == playerStates.idle || this.currentState == playerStates.blocking) {
+            if (this.currentState == playerStates.idle) {
                 this.context.drawImage(this.img[frame], this.position.x, this.position.y);
             }
             else if (this.currentState == playerStates.jumping || this.currentState == playerStates.endingJump)
             {
                 this.context.drawImage(this.imgJump[frame], this.position.x, this.position.y);
+            }
+
+            else if (this.currentState == playerStates.blocking) {
+                this.context.drawImage(this.imgBlock[frame], this.position.x, this.position.y);
             }
         }
     }
@@ -186,6 +192,10 @@ class Character {
         for (var i = 2; i <= 3 ; i++) {
             this.imgJump[i - 2].src = characterJumpPath + i + ".png";
         }
+        
+        for (var i = 0; i <= 7 ; i++) {
+            this.imgBlock[i].src = characterBlockPath + i + ".png";
+        }
         console.log(this.impJump);
         this.image = this.img[0];
         this.img[0].onload = function () {
@@ -211,6 +221,11 @@ class Character {
                 case 16:
                    if (character.currentState != playerStates.jumping) {
                        character.currentState = playerStates.blocking;
+                    if(character.currentState != playerStates.blocking)
+                       {
+                            playerAnimationFrame = 0;
+                            playerAnimationTick = 0;
+                        }
                     }
                     break;
             }
@@ -468,12 +483,17 @@ function init(){
 	startMenu.setMenuImage();
 
 	character = new Character();
-	if (character.currentState == playerStates.idle || character.currentState == playerStates.blocking) {
-	    character.setCharacterSpriteImage(characterpath);
-	}
-	else if (character.currentState == playerStates.jumping) {
-	    character.setCharacterSpriteImage(characterJumpPath);
-	}
+    if (character.currentState == playerStates.idle) {
+        character.setCharacterSpriteImage(characterpath);
+    }
+    else if (character.currentState == playerStates.jumping) {
+        character.setCharacterSpriteImage(characterJumpPath);
+    }
+
+    else if (character.currentState == playerStates.blocking) {
+        character.setCharacterSpriteImage(characterBlockPath);
+    }
+
 	obstacle = new Obstacle();
 	obstacle.setObstacleSpriteImage(obstaclePath);
 	spawnSeagull();
@@ -511,27 +531,36 @@ function init(){
 	            seagulltick = Math.random() * (300 - 0) + 0;
 	        }
 	        if (playerAnimationTick >= fps / 4 && character.currentState == playerStates.idle) {
-	            playerAnimationFrame++
-	            if (playerAnimationFrame > 1) {
-	                playerAnimationFrame = 0;
-	            }
-	            playerAnimationTick = 0;
-	        }
-	        else if (character.currentState == playerStates.jumping) {
-	            playerAnimationFrame = 0;
-	        }
-	        else if (character.currentState == playerStates.endingJump) {
-	            playerAnimationFrame = 1;
-	        }
+            playerAnimationFrame++
+            if (playerAnimationFrame > 1) {
+                playerAnimationFrame = 0;
+            }
+            playerAnimationTick = 0;
+        }
+        else if (character.currentState == playerStates.jumping) {
+            playerAnimationFrame = 0;
+        }
+        else if (character.currentState == playerStates.endingJump) {
+            playerAnimationFrame = 1;
+        }
+        
+        else if(playerAnimationTick >= fps/4 && character.currentState == playerStates.blocking)
+        {
+            playerAnimationFrame++;
+            if(playerAnimationFrame > 6)
+            {
+                playerAnimationFrame = 6;
+            }
+        }
 
-	        if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
-	        {
-	            randomVelocitySelector();
-	            obstacle = new Obstacle();
-	            randomObstaclePath();
-	            obstacle.setObstacleSpriteImage(obstaclePath);
+        if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
+        {
+            randomVelocitySelector();
+            obstacle = new Obstacle();
+            randomObstaclePath();
+            obstacle.setObstacleSpriteImage(obstaclePath);
 
-	        }
+        }
 	        // console.log("tick!");
 	        character.checkCollision(obstacle, false);
 	        character.checkCollision(seagull, true);
