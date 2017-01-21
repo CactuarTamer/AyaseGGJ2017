@@ -85,7 +85,7 @@ function spawnSeagull() {
 
 
 
-var characterpath = "Assets/Graphics/emptysurfer.png";
+var characterpath = "Assets/Graphics/chara1_idle-";
 var seagullpath = "Assets/Graphics/emptyseagull.png";
 var gravity = 10;
 var wavePushback = 5;
@@ -102,24 +102,27 @@ class Character {
         this.startpos = (canvasW / 2) - (canvasW / 4);
         this.position = { x: this.startpos, y: 100 };
         this.jumpingPower = 100;
+        this.img = [new Image(), new Image()];
     }
 
-    render() {
+    render(frame) {
         if (this.ready) {
             this.userInput();
             this.move();
-            this.context.drawImage(this.image, this.position.x, this.position.y);
+            this.context.drawImage(this.img[frame], this.position.x, this.position.y);
+            console.log(frame);
         }
     }
 
     setCharacterSpriteImage(image) {
-        var img = new Image();
         var character = this;
-        img.src = image;
-        this.image = img;
-        img.onload = function () {
+        for (var i = 1; i <= 2 ; i++) {
+            this.img[i-1].src = image + i + ".png";
+        }
+        this.image = this.img[0];
+        this.img[0].onload = function () {
             character.ready = true;
-            character.render();
+            character.render(0);
         }
     }
 
@@ -278,14 +281,16 @@ function init(){
 	spawnSeagull();
 	var daytick = 0;
 	var seagulltick = Math.random() * (300 - 0) + 0;
+	var playerAnimationTick = 0;
+	var playerAnimationFrame = 0;
     //initialize interval
 	setInterval(function(){
 	    mainText.clearRect(0,0,canvasW,canvasH);
 	    skyText.clearRect(0,0,canvasW,canvasH);
 	    backText.clearRect(0,0,canvasW,canvasH);
-		
 	    daytick++;
-        seagulltick++
+	    seagulltick++
+	    playerAnimationTick++;
 	    if(daytick >= 150){
 	    	changeDayState();   	
 			sea.setGradient(dayState.sea);
@@ -297,12 +302,21 @@ function init(){
 	        spawnSeagull();
 	        seagulltick = Math.random() * (300 - 0) + 0;
 	    }
-
+	    if (playerAnimationTick >= fps/4)
+	    {
+	        playerAnimationFrame++
+	        if(playerAnimationFrame > 1)
+	        {
+	            console.log("reset");
+	            playerAnimationFrame = 0;
+	        }
+	        playerAnimationTick = 0;
+	    }
 	    console.log("tick!");
 
 	    sea.render(); //draw the sea.
 	    sky.render(); //draw the sea.
-	    character.render();//draw the character
+	    character.render(playerAnimationFrame);//draw the character
 	    seagull.render();
 	}, 1000/fps);
     //draw the stars
