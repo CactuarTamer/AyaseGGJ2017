@@ -77,11 +77,16 @@ function changeDayState(){
 	}
 }
 
+function spawnSeagull() {
+    seagull = new SeaGull();
+    seagull.setSeagullSpriteImage(seagullpath)
+}
 //console.log(dayStates);
 
 
 
 var characterpath = "Assets/Graphics/emptysurfer.png";
+var seagullpath = "Assets/Graphics/emptyseagull.png";
 var gravity = 10;
 var wavePushback = 5;
 var basePosition = 100;
@@ -163,6 +168,44 @@ class Character {
     }
 }
 
+class SeaGull {
+    constructor() {
+        this.context = context;
+        this.ready = false;
+        this.startPointOffset = Math.random() * (300 - 0) + 0;
+        this.playerPosition = { x: (canvasW / 2) - (canvasW / 4) + 200, y: 230 };
+        this.startpos = {x: (canvasW - this.startPointOffset), y: 0}
+        this.directionVector = { x: this.playerPosition.x - this.startpos.x, y: -(this.playerPosition.y - this.startpos.y) };
+        this.directionVectorLength = Math.sqrt((this.directionVector.x*this.directionVector.x) + (this.directionVector.y*this.directionVector.y))
+        this.normalizedVector = { x: this.directionVector.x / this.directionVectorLength, y: this.directionVector.y / this.directionVectorLength };
+        this.velocity = { x: this.normalizedVector.x * 10, y: (this.normalizedVector.y * 10) };
+        this.position = { x: this.startpos.x, y: 0};
+    }
+
+    render() {
+        if (this.ready) {
+            this.move();
+            this.context.drawImage(this.image, this.position.x, this.position.y);
+        }
+    }
+
+    move() {
+        this.position.x += this.velocity.x;
+        this.position.y -= this.velocity.y;
+    }
+
+    setSeagullSpriteImage(image) {
+        var img = new Image();
+        var character = this;
+        img.src = image;
+        this.image = img;
+        img.onload = function () {
+            character.ready = true;
+            character.render();
+        }
+    }
+
+}
 
 class changeBlock{
 	constructor(context, xpos, ypos, width, height){
@@ -232,7 +275,9 @@ function init(){
 
 	character = new Character();
 	character.setCharacterSpriteImage(characterpath)
+	spawnSeagull();
 	var daytick = 0;
+	var seagulltick = Math.random() * (300 - 0) + 0;
     //initialize interval
 	setInterval(function(){
 	    mainText.clearRect(0,0,canvasW,canvasH);
@@ -240,19 +285,25 @@ function init(){
 	    backText.clearRect(0,0,canvasW,canvasH);
 		
 	    daytick++;
+        seagulltick++
 	    if(daytick >= 150){
 	    	changeDayState();   	
 			sea.setGradient(dayState.sea);
 			sky.setGradient(dayState.sky);
 			daytick = 0;
 	    }
-
+	    if (seagulltick >= 500) {
+	        delete (seagull);
+	        spawnSeagull();
+	        seagulltick = Math.random() * (300 - 0) + 0;
+	    }
 
 	    console.log("tick!");
 
 	    sea.render(); //draw the sea.
 	    sky.render(); //draw the sea.
 	    character.render();//draw the character
+	    seagull.render();
 	}, 1000/fps);
     //draw the stars
 
