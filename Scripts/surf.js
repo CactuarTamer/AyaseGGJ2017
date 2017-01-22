@@ -110,7 +110,7 @@ var spazzySeagullpath = "Assets/Graphics/Spazzy.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
 var startMenuPath = "Assets/Graphics/StartScreen.png";
 var replayMenuPath = "Assets/Graphics/EndScreen.png";
-var obstacleSize = {h: 200, w: 200}
+var obstacleSize = {h: 200, w: 100}
 var gravity = 8;
 var wavePushback = 5;
 var basePosition = 200;
@@ -188,7 +188,7 @@ class Character {
     }
 
     checkCollision(object, isBlockable) {
-        var rect1 = { x: this.position.x, y: this.position.y, width: 300, height: 200 };
+        var rect1 = { x: this.position.x, y: this.position.y, width: 300, height: 250 };
         var rect2 = { x: object.position.x, y: object.position.y, width: object.width, height: object.height };
 
         if (this.currentState == playerStates.blocking && isBlockable &&
@@ -205,6 +205,8 @@ class Character {
             rect1.y < rect2.y + rect2.height &&
             rect1.height + rect1.y > rect2.y)
             {
+                console.log("Collide");
+                console.log(object);
             	if(!object.dead){
             		if(currenthealth > 0){
             			currenthealth -= 1;
@@ -318,13 +320,13 @@ function randomObstaclePath() {
     var randomInteger = getRandomArbitrary(0, 2);
     if (randomInteger == 0) {
         obstaclePath = "Assets/Graphics/Trash.png";
-        obstacleSize.w = 200;
+        obstacleSize.w = 100;
         obstacleSize.h = 200;
     }
 
     else {
         obstaclePath = "Assets/Graphics/Buoy.png";
-        obstacleSize.w = 150;
+        obstacleSize.w = 75;
         obstacleSize.h = 200;
     }
     //randomise velocity
