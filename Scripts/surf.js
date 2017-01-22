@@ -133,8 +133,9 @@ class Character {
         this.jumpingPower = 75;
         this.img = [new Image(), new Image()];
         this.imgJump = [new Image(), new Image()];
-        this.imgBlock = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()];
+        this.imgBlock = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),new Image()];
         this.currentState = playerStates.idle;
+        this.acceptingInput = true;
     }
 
     render(frame) {
@@ -214,37 +215,41 @@ class Character {
 
     userInput() {
         var character = this;
-        $(document.body).on('keydown', function (e) {
-            switch(e.which)
-            {
-                case 32:
-                    if(character.currentState != playerStates.jumping) {
-                        character.currentState = playerStates.jumping;
-                        character.velocity.y = character.jumpingPower;
-                        character.velocity.x = character.jumpingPower / 10;
-                        playerAnimationFrame = 0;
-                        playerAnimationTick = 0;
-                    }
-                    break;
-                case 16:
-                   if (character.currentState != playerStates.jumping) {
-                       character.currentState = playerStates.blocking;
-                    if(character.currentState != playerStates.blocking)
-                       {
-                            playerAnimationFrame = 0;
-                            playerAnimationTick = 0;
-                        }
-                    }
-                    break;
-            }
-        })
-        $(document.body).on('keyup', function (e) {
-            switch (e.which)  
-            {
-                case 16:
-                    character.currentState = playerStates.idle;
-            }
-        })
+        if(character.acceptingInput == true){
+	        $(document.body).on('keydown', function (e) {
+	        	character.acceptingInput = false;
+	            switch(e.which)
+	            {
+	                case 32:
+	                    if(character.currentState != playerStates.jumping) {
+	                        character.currentState = playerStates.jumping;
+	                        character.velocity.y = character.jumpingPower;
+	                        character.velocity.x = character.jumpingPower / 10;
+	                        playerAnimationFrame = 0;
+	                        playerAnimationTick = 0;
+	                    }
+	                    break;
+	                case 16:
+	                   if (character.currentState != playerStates.jumping) {
+	                       character.currentState = playerStates.blocking;
+	                    if(character.currentState != playerStates.blocking)
+	                       {
+	                            playerAnimationFrame = 0;
+	                            playerAnimationTick = 0;
+	                        }
+	                    }
+	                    break;
+	            }
+	        })
+	        //$(document.body).on('keyup', function (e) {
+	        //    switch (e.which)  
+	        //    {
+	        //        case 16:
+	        //            character.currentState = playerStates.idle;
+	        //            character.acceptingInput = true;
+	        //    }
+	        //})
+	    }
     }
 
     move() {
@@ -468,7 +473,7 @@ function zerofy(num){
 	}
 }
 
-
+/* Can't make donuts work
 class Donut {
     constructor(context, xpos) {
         this.ctx = context;
@@ -510,6 +515,8 @@ function poplulateDonuts(context){
 	}
     return donuts;
 }
+
+*/
 
 function getTimefromTick(){
 	totalseconds = Math.floor(timetick/fps);
@@ -565,8 +572,8 @@ function init(){
 	spawnSeagull();
 	var daytick = 0;
 	var seagulltick = Math.random() * (300 - 0) + 0;
-	var currentDonuts = poplulateDonuts(skyText);
-	console.log(currentDonuts);
+	//var currentDonuts = poplulateDonuts(skyText);
+	//console.log(currentDonuts);
 	var seconds
 	audio.play();
     //initialize interval
@@ -623,9 +630,12 @@ function init(){
         else if(playerAnimationTick >= fps/4 && character.currentState == playerStates.blocking)
         {
             playerAnimationFrame++;
-            if(playerAnimationFrame > 6)
-            {
-                playerAnimationFrame = 6;
+            if(playerAnimationFrame > 6 && playerAnimationFrame <=7){
+                playerAnimationFrame = 7;
+                playerAnimationFrame++;
+            }else if(playerAnimationFrame > 7){
+            	character.currentState = playerStates.idle;
+            	character.acceptingInput = true;
             }
         }
 
@@ -646,25 +656,36 @@ function init(){
 	        character.render(playerAnimationFrame);//draw the character
 	        seagull.render();
 	        
-
+	        var healthstring = "";
 	        for(var i = 0; i < currenthealth; i++){
-	        	console.log(currentDonuts[i]);
-	        	currentDonuts[i].setDonut();
+
+	        	healthstring += "&#x2764;";
+
+	        	//heart = String.fromCharCode(c);
 	        }
 
 
-	        if(dayState == dayStates.sunset || dayState == dayStates.night){mainText.fillStyle = "white";}
-	        else {mainText.fillStyle = "black";}
-	        mainText.font = "30px Arial";
+	        if(dayState == dayStates.sunset || dayState == dayStates.night){backText.fillStyle = "white";}
+	        else {backText.fillStyle = "black";}
+	        backText.font = "30px Arial";
 
 	        //Labels
-	        mainText.fillText("Score:",20,50);
-	        mainText.fillText("Time:",300,50);
+	        backText.fillText("Score:",20,50);
+	        backText.fillText("Time:",300,50);
 
-	        mainText.font = "40px Arial";
+	        backText.font = "40px Arial";
 	        //Numbers
-	        mainText.fillText(score,150,50);
-	        mainText.fillText(playtime,400,50);
+	        backText.fillText(score,150,50);
+	        backText.fillText(playtime,400,50);
+
+
+	        for(var i = 0; i < currenthealth; i++){
+	        	xpos = 60*i;
+	        	var h="10084";
+	        	backText.fillText(String.fromCharCode(h),xpos+20,100);
+	        }
+	        
+	        
 	    }
         //END GAME STATE
 
