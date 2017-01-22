@@ -398,7 +398,7 @@ class StartMenu {
 
     render() {
         if (this.ready) {
-            this.context.drawImage(this.image, 0, 0);
+            this.context.drawImage(this.image, 400, -50);
         }
     }
 
@@ -432,7 +432,7 @@ class ReplayMenu {
 
     render() {
         if (this.ready) {
-            this.context.drawImage(this.image, 0, 0);
+            this.context.drawImage(this.image, 400, -50);
         }
     }
 
