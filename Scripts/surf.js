@@ -226,10 +226,10 @@ class Character {
             this.imgJump[i - 2].src = characterJumpPath + i + ".png";
         }
         
-        for (var i = 0; i <= 7 ; i++) {
+        for (var i = 0; i <= 8; i++) {
             this.imgBlock[i].src = characterBlockPath + i + ".png";
+            console.log(this.imgBlock[i]);
         }
-        console.log(this.impJump);
         this.image = this.img[0];
         this.img[0].onload = function () {
             character.ready = true;
@@ -253,7 +253,7 @@ class Character {
 	                        playerAnimationTick = 0;
 	                    }
 	                    break;
-	                case 16:
+	                case 70:
 	                   if (character.currentState != playerStates.jumping) {
 	                       character.currentState = playerStates.blocking;
 	                    if(character.currentState != playerStates.blocking)
@@ -723,9 +723,12 @@ function init(){
                 playerAnimationFrame = 7;
                 playerAnimationFrame++;
             }else if(playerAnimationFrame > 7){
-            	character.currentState = playerStates.idle;
+                character.currentState = playerStates.idle;
+                playerAnimationFrame = 0;
             	character.acceptingInput = true;
             }
+            console.log(playerAnimationFrame);
+
         }
 
         if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
