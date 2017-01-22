@@ -109,7 +109,7 @@ var wavePushback = 5;
 var basePosition = 200;
 var xPositionLimit = canvasW - (canvasW / 4);
 var randomVelocity;
-var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp');
+var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp3');
 var currentGameState = gameStates.start;
 
 //audio settings
@@ -329,7 +329,7 @@ class Obstacle {
 
 
 function startFunction(){
-    currentGameState = gameStates.end;
+    currentGameState = gameStates.game;
     console.log("start clicked");
 }
 
