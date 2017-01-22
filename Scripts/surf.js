@@ -136,6 +136,7 @@ class Character {
         this.imgBlock = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),new Image()];
         this.currentState = playerStates.idle;
         this.acceptingInput = true;
+
     }
 
     render(frame) {
@@ -188,7 +189,9 @@ class Character {
             rect1.y < rect2.y + rect2.height &&
             rect1.height + rect1.y > rect2.y)
             {
-            	if(currenthealth > 0){currenthealth -= 1};
+            	if(!object.dead){
+            		if(currenthealth > 0){currenthealth -= 1};}
+            	object.dead = true;
             }
         }
     }
@@ -240,7 +243,7 @@ class Character {
 	                    }
 	                    break;
 	            }
-	        })
+	        });
 	        //$(document.body).on('keyup', function (e) {
 	        //    switch (e.which)  
 	        //    {
@@ -323,6 +326,7 @@ class Obstacle {
         this.position = { x: startpos, y: canvasH - 300 };
         this.width = obstacleSize.w;
         this.height = obstacleSize.h;
+        this.dead = false;
     }
 
     render() {
