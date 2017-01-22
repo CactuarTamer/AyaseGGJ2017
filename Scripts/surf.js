@@ -547,9 +547,9 @@ function init(){
         else if(playerAnimationTick >= fps/4 && character.currentState == playerStates.blocking)
         {
             playerAnimationFrame++;
-            if(playerAnimationFrame > 6)
+            if(playerAnimationFrame > 7)
             {
-                playerAnimationFrame = 6;
+                playerAnimationFrame = 7;
             }
         }
 
@@ -566,9 +566,9 @@ function init(){
 	        character.checkCollision(seagull, true);
 	        sea.render(); //draw the sea.
 	        sky.render(); //draw the sea.
-	        obstacle.render();//draw the obstacle
 	        character.render(playerAnimationFrame);//draw the character
-	        seagull.render();
+	        obstacle.render();//draw the obstacle
+            seagull.render();
 	    }
         //END GAME STATE
 	}, 1000/fps);
