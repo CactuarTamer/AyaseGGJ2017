@@ -5,6 +5,12 @@ var canvasW = winW - 50;
 var canvasH = 700;
 var horizon = 250;
 
+var playtime = 0;
+var timetick = 0;
+var score = 0;
+var currenthealth = 3;
+
+
 var playerAnimationTick = 0;
 var playerAnimationFrame = 0;
 
@@ -116,6 +122,21 @@ var currentGameState = gameStates.start;
 //audio settings
 audio.loop = true;
 
+function resetStats(){
+	playtime = 0;
+	currenthealth = 3;
+	timetick = 0;
+	score = 0;
+}
+
+
+function healthcheck(){
+	if(currenthealth<=0){
+		currentGameState = gameStates.end;
+	}
+}
+
+
 class Character {
 
     constructor() {
@@ -128,8 +149,10 @@ class Character {
         this.jumpingPower = 75;
         this.img = [new Image(), new Image()];
         this.imgJump = [new Image(), new Image()];
-        this.imgBlock = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()];
+        this.imgBlock = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),new Image()];
         this.currentState = playerStates.idle;
+        this.acceptingInput = true;
+
     }
 
     render(frame) {
@@ -173,6 +196,7 @@ class Character {
             rect1.x + rect1.width > rect2.x &&
             rect1.y < rect2.y + rect2.height &&
             rect1.height + rect1.y > rect2.y) {
+        	if(!object.dead){score += 50;}
             object.dead = true;
         }
         else {
@@ -181,6 +205,14 @@ class Character {
             rect1.y < rect2.y + rect2.height &&
             rect1.height + rect1.y > rect2.y)
             {
+            	if(!object.dead){
+            		if(currenthealth > 0){
+            			currenthealth -= 1;
+            		}
+
+       				healthcheck();
+            	}
+            	object.dead = true;
             }
         }
     }
@@ -194,10 +226,10 @@ class Character {
             this.imgJump[i - 2].src = characterJumpPath + i + ".png";
         }
         
-        for (var i = 0; i <= 7 ; i++) {
+        for (var i = 0; i <= 8; i++) {
             this.imgBlock[i].src = characterBlockPath + i + ".png";
+            console.log(this.imgBlock[i]);
         }
-        console.log(this.impJump);
         this.image = this.img[0];
         this.img[0].onload = function () {
             character.ready = true;
@@ -207,37 +239,41 @@ class Character {
 
     userInput() {
         var character = this;
-        $(document.body).on('keydown', function (e) {
-            switch(e.which)
-            {
-                case 32:
-                    if(character.currentState != playerStates.jumping) {
-                        character.currentState = playerStates.jumping;
-                        character.velocity.y = character.jumpingPower;
-                        character.velocity.x = character.jumpingPower / 10;
-                        playerAnimationFrame = 0;
-                        playerAnimationTick = 0;
-                    }
-                    break;
-                case 16:
-                   if (character.currentState != playerStates.jumping) {
-                       character.currentState = playerStates.blocking;
-                    if(character.currentState != playerStates.blocking)
-                       {
-                            playerAnimationFrame = 0;
-                            playerAnimationTick = 0;
-                        }
-                    }
-                    break;
-            }
-        })
-        $(document.body).on('keyup', function (e) {
-            switch (e.which)  
-            {
-                case 16:
-                    character.currentState = playerStates.idle;
-            }
-        })
+        if(character.acceptingInput == true){
+	        $(document.body).on('keydown', function (e) {
+	        	character.acceptingInput = false;
+	            switch(e.which)
+	            {
+	                case 32:
+	                    if(character.currentState != playerStates.jumping) {
+	                        character.currentState = playerStates.jumping;
+	                        character.velocity.y = character.jumpingPower;
+	                        character.velocity.x = character.jumpingPower / 10;
+	                        playerAnimationFrame = 0;
+	                        playerAnimationTick = 0;
+	                    }
+	                    break;
+	                case 70:
+	                   if (character.currentState != playerStates.jumping) {
+	                       character.currentState = playerStates.blocking;
+	                    if(character.currentState != playerStates.blocking)
+	                       {
+	                            playerAnimationFrame = 0;
+	                            playerAnimationTick = 0;
+	                        }
+	                    }
+	                    break;
+	            }
+	        });
+	        //$(document.body).on('keyup', function (e) {
+	        //    switch (e.which)  
+	        //    {
+	        //        case 16:
+	        //            character.currentState = playerStates.idle;
+	        //            character.acceptingInput = true;
+	        //    }
+	        //})
+	    }
     }
 
     move() {
@@ -311,6 +347,7 @@ class Obstacle {
         this.position = { x: startpos, y: canvasH - 300 };
         this.width = obstacleSize.w;
         this.height = obstacleSize.h;
+        this.dead = false;
     }
 
     render() {
@@ -376,6 +413,7 @@ class StartMenu {
 }
 
 function replayFunction(){
+	resetStats();
     currentGameState = gameStates.start;
     console.log("replay clicked");
 }
@@ -492,6 +530,68 @@ class changeBlock{
 	}
 }
 
+function zerofy(num){
+	if(num >-1 && num < 10){
+		numstring = '0'+num;
+		return numstring;
+	}else{
+		return num;
+	}
+}
+
+/* Can't make donuts work
+class Donut {
+    constructor(context, xpos) {
+        this.ctx = context;
+        this.ready = false;
+        this.xpos = xpos;
+        this.ypos = 75;
+    }
+    setDonut(){
+    	var img = new Image();
+        var donut = this;
+        img.onload = function () {
+            this.ready = true;
+            var ctx = canvas.getContext("2d");
+        	donut.ctx.drawImage(this, donut.xpos, donut.ypos);
+        }
+        img.src = "Assets/Graphics/lifedonut.png";
+        
+    }
+
+    render() {
+    	console.log("entered render... ready: "+this.ready);
+        if(this.ready) {
+            this.context.drawImage(this.image, this.xpos, this.ypos);
+        } 
+    }
+}
+
+function poplulateDonuts(context){
+	var donuts = [];
+
+	for(var i = 0; i < currenthealth; i++){
+		console.log("Donut!");
+		imgwidth = 60;
+		var xpos =  (imgwidth*i)+50;
+
+		var donut = new Donut(context, xpos);
+		donut.setDonut();  
+		donuts.push(donut);      
+	}
+    return donuts;
+}
+
+*/
+
+function getTimefromTick(){
+	totalseconds = Math.floor(timetick/fps);
+	minutes = Math.floor(totalseconds/60);
+	seconds = totalseconds % 60;
+	timestring = zerofy(minutes)+":"+zerofy(seconds);
+	return timestring;
+}
+
 function init(){
 	canvas = document.getElementById("main");
 	context = canvas.getContext("2d");
@@ -543,6 +643,9 @@ function init(){
 	spawnSeagull();
 	var daytick = 0;
 	var seagulltick = Math.random() * (300 - 0) + 0;
+	//var currentDonuts = poplulateDonuts(skyText);
+	//console.log(currentDonuts);
+	var seconds
 	audio.play();
     //initialize interval
 	setInterval(function () {
@@ -550,6 +653,10 @@ function init(){
 	    mainText.clearRect(0, 0, canvasW, canvasH);
 	    skyText.clearRect(0, 0, canvasW, canvasH);
 	    backText.clearRect(0, 0, canvasW, canvasH);
+
+
+
+
 
 	    //START MENU STATE
 	    if (currentGameState == gameStates.start)
@@ -581,6 +688,9 @@ function init(){
 	        daytick++;
 	        seagulltick++
 	        playerAnimationTick++;
+	        timetick++;
+	        playtime = getTimefromTick();
+
 	        if (daytick >= 150) {
 	            changeDayState();
 	            sea.setGradient(dayState.sea);
@@ -609,10 +719,16 @@ function init(){
         else if(playerAnimationTick >= fps/4 && character.currentState == playerStates.blocking)
         {
             playerAnimationFrame++;
-            if(playerAnimationFrame > 6)
-            {
-                playerAnimationFrame = 6;
+            if(playerAnimationFrame > 6 && playerAnimationFrame <=7){
+                playerAnimationFrame = 7;
+                playerAnimationFrame++;
+            }else if(playerAnimationFrame > 7){
+                character.currentState = playerStates.idle;
+                playerAnimationFrame = 0;
+            	character.acceptingInput = true;
             }
+            console.log(playerAnimationFrame);
+
         }
 
         if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
@@ -632,9 +748,47 @@ function init(){
 	        character.render(playerAnimationFrame);//draw the character
 	        seagull.render();
 
+	        
+	        var healthstring = "";
+	        for(var i = 0; i < currenthealth; i++){
+
+	        	healthstring += "&#x2764;";
+
+	        	//heart = String.fromCharCode(c);
+	        }
+
+
+	        if(dayState == dayStates.sunset || dayState == dayStates.night){backText.fillStyle = "white";}
+	        else {backText.fillStyle = "black";}
+	        backText.font = "30px Arial";
+
+	        //Labels
+	        backText.fillText("Score:",20,50);
+	        backText.fillText("Time:",300,50);
+
+	        backText.font = "40px Arial";
+	        //Numbers
+	        backText.fillText(score,150,50);
+	        backText.fillText(playtime,400,50);
+
+
+	        for(var i = 0; i < currenthealth; i++){
+	        	xpos = 60*i;
+	        	var h="10084";
+	        	backText.fillText(String.fromCharCode(h),xpos+20,100);
+	        }
+	        
 
 	    }
         //END GAME STATE
+
+
+
+        //Indicators
+		
+
+		
+
 	}, 1000/fps);
     //draw the stars
 
