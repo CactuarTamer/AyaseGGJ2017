@@ -327,16 +327,19 @@ class Obstacle {
     }
 }
 
+
+function startFunction(){
+    currentGameState = gameStates.end;
+    console.log("start clicked");
+}
+
 class StartMenu {
     constructor() {
         this.context = context;
         this.ready = false;
-        document.getElementById('main').addEventListener('click', function (e) {
-            currentGameState = gameStates.end; 
-            //replayMenu = new ReplayMenu();
-            //replayMenu.setReplayImage();
-            console.log("clicked");
-        }, false);
+        document.getElementById('main').addEventListener('click', startFunction,
+        false
+        );
     }
 
     render() {
@@ -357,16 +360,19 @@ class StartMenu {
     }
 }
 
+function replayFunction(){
+    currentGameState = gameStates.start;
+    console.log("replay clicked");
+}
+
+
 class ReplayMenu {
     constructor() {
         this.context = context;
         this.ready = false;
-        document.getElementById('main').addEventListener('click', function (e) {
-            currentGameState = gameStates.start;
-            //startMenu = new StartMenu(); turn this into a function?
-           //startMenu.setStartImage();
-            console.log("clicked");
-        }, false);
+        document.getElementById('main').addEventListener('click', replayFunction,
+        false
+        );
     }
 
     render() {
@@ -492,7 +498,8 @@ function init(){
 	backText.canvas.width = canvasW;
 	backText.canvas.height = canvasH;
 
-
+    replayMenu = new ReplayMenu(); 
+    replayMenu.setReplayImage();
 
 	sky = new changeBlock(skyText, 0, 0, canvasW, horizon)
 	sea = new changeBlock(backText, 0, horizon, canvasW, canvasH-horizon);
@@ -501,6 +508,8 @@ function init(){
 	sky.setGradient(dayState.sky);
 	startMenu = new StartMenu();
 	startMenu.setMenuImage();
+
+
 
 	character = new Character();
 	if (character.currentState == playerStates.idle || character.currentState == playerStates.blocking) {
@@ -525,15 +534,24 @@ function init(){
 	    //START MENU STATE
 	    if (currentGameState == gameStates.start)
 	    {
+            document.getElementById('main').removeEventListener('click',
+            replayFunction,
+            false);
+            document.getElementById('main').addEventListener('click', startFunction,
+            false
+            );
 	        startMenu.render();
 	        sea.render(); //draw the sea.
 	        sky.render(); //draw the sea.
 	    }
 
-        if (currentGameState == gameStates.end)
-        {
-            replayMenu = new ReplayMenu();
-            replayMenu.setReplayImage()
+        if (currentGameState == gameStates.end)            
+        {   document.getElementById('main').removeEventListener('click',
+            startFunction,
+            false);
+            document.getElementById('main').addEventListener('click', replayFunction,
+            false
+            );
             replayMenu.render();
             sea.render(); //draw the sea.
             sky.render(); //draw the sea.
