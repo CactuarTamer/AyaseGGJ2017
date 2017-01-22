@@ -4,7 +4,7 @@ var winH = window.innerHeight;
 var canvasW = winW - 50;
 var canvasH = 700;
 var horizon = 250;
-
+var isBuoy = false;
 var playtime = 0;
 var timetick = 0;
 var score = 0;
@@ -205,8 +205,6 @@ class Character {
             rect1.y < rect2.y + rect2.height &&
             rect1.height + rect1.y > rect2.y)
             {
-                console.log("Collide");
-                console.log(object);
             	if(!object.dead){
             		if(currenthealth > 0){
             			currenthealth -= 1;
@@ -322,12 +320,15 @@ function randomObstaclePath() {
         obstaclePath = "Assets/Graphics/Trash.png";
         obstacleSize.w = 100;
         obstacleSize.h = 200;
+        isBuoy = false;
     }
 
     else {
         obstaclePath = "Assets/Graphics/Buoy.png";
         obstacleSize.w = 75;
         obstacleSize.h = 200;
+        isBuoy = true;
+        console.log(isBuoy);
     }
     //randomise velocity
 
@@ -347,6 +348,10 @@ class Obstacle {
         this.ready = false;
         var startpos = canvasW; //need to randomise Y 
         this.position = { x: startpos, y: canvasH - 300 };
+        if (isBuoy) {
+            console.log("hello");
+            this.position.y = this.position.y - 100;
+        }
         this.width = obstacleSize.w;
         this.height = obstacleSize.h;
         this.dead = false;
@@ -384,7 +389,6 @@ class Obstacle {
 
 function startFunction(){
     currentGameState = gameStates.game;
-    console.log("start clicked");
 }
 
 class StartMenu {
@@ -417,7 +421,6 @@ class StartMenu {
 function replayFunction(){
 	resetStats();
     currentGameState = gameStates.start;
-    console.log("replay clicked");
 }
 
 
@@ -736,8 +739,8 @@ function init(){
         if (obstacle.position.x < 0 - 200) //insert obstacle width if possible
         {
             randomVelocitySelector();
-            obstacle = new Obstacle();
             randomObstaclePath();
+            obstacle = new Obstacle();
             obstacle.setObstacleSpriteImage(obstaclePath);
 
         }
@@ -746,8 +749,8 @@ function init(){
 	        character.checkCollision(seagull, true);
 	        sea.render(); //draw the sea.
 	        sky.render(); //draw the sea.
-	        obstacle.render();//draw the obstacle
 	        character.render(playerAnimationFrame);//draw the character
+	        obstacle.render();//draw the obstacle
 	        seagull.render();
 
 	        
