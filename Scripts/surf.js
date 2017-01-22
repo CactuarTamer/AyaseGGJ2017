@@ -178,6 +178,7 @@ class Character {
             rect1.x + rect1.width > rect2.x &&
             rect1.y < rect2.y + rect2.height &&
             rect1.height + rect1.y > rect2.y) {
+        	if(!object.dead){score += 50;}
             object.dead = true;
         }
         else {
@@ -186,6 +187,7 @@ class Character {
             rect1.y < rect2.y + rect2.height &&
             rect1.height + rect1.y > rect2.y)
             {
+            	if(currenthealth > 0){currenthealth -= 1};
             }
         }
     }
@@ -661,7 +663,7 @@ function init(){
 
 	        mainText.font = "40px Arial";
 	        //Numbers
-	        mainText.fillText("0000",150,50);
+	        mainText.fillText(score,150,50);
 	        mainText.fillText(playtime,400,50);
 	    }
         //END GAME STATE
