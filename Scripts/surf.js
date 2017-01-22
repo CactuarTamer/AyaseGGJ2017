@@ -5,6 +5,12 @@ var canvasW = winW - 50;
 var canvasH = 700;
 var horizon = 250;
 
+var playtime = 0;
+var timetick = 0;
+var score = 0;
+var currenthealth = 3;
+
+
 var playerAnimationTick = 0;
 var playerAnimationFrame = 0;
 
@@ -451,6 +457,66 @@ class changeBlock{
 	}
 }
 
+function zerofy(num){
+	if(num >-1 && num < 10){
+		numstring = '0'+num;
+		return numstring;
+	}else{
+		return num;
+	}
+}
+
+
+class Donut {
+    constructor(context, xpos) {
+        this.ctx = context;
+        this.ready = false;
+        this.xpos = xpos;
+        this.ypos = 75;
+    }
+    setDonut(){
+    	var img = new Image();
+        var donut = this;
+        img.onload = function () {
+            this.ready = true;
+            var ctx = canvas.getContext("2d");
+        	donut.ctx.drawImage(this, donut.xpos, donut.ypos);
+        }
+        img.src = "Assets/Graphics/lifedonut.png";
+        
+    }
+
+    render() {
+    	console.log("entered render... ready: "+this.ready);
+        if(this.ready) {
+            this.context.drawImage(this.image, this.xpos, this.ypos);
+        } 
+    }
+}
+
+function poplulateDonuts(context){
+	var donuts = [];
+
+	for(var i = 0; i < currenthealth; i++){
+		console.log("Donut!");
+		imgwidth = 60;
+		var xpos =  (imgwidth*i)+50;
+
+		var donut = new Donut(context, xpos);
+		donut.setDonut();  
+		donuts.push(donut);      
+	}
+    return donuts;
+}
+
+function getTimefromTick(){
+	totalseconds = Math.floor(timetick/fps);
+	minutes = Math.floor(totalseconds/60);
+	seconds = totalseconds % 60;
+	timestring = zerofy(minutes)+":"+zerofy(seconds);
+	return timestring;
+}
+
 function init(){
 	canvas = document.getElementById("main");
 	context = canvas.getContext("2d");
@@ -471,8 +537,6 @@ function init(){
 	backText = backVas.getContext("2d");
 	backText.canvas.width = canvasW;
 	backText.canvas.height = canvasH;
-
-
 
 	sky = new changeBlock(skyText, 0, 0, canvasW, horizon)
 	sea = new changeBlock(backText, 0, horizon, canvasW, canvasH-horizon);
@@ -499,6 +563,9 @@ function init(){
 	spawnSeagull();
 	var daytick = 0;
 	var seagulltick = Math.random() * (300 - 0) + 0;
+	var currentDonuts = poplulateDonuts(skyText);
+	console.log(currentDonuts);
+	var seconds
 	audio.play();
     //initialize interval
 	setInterval(function () {
@@ -506,6 +573,10 @@ function init(){
 	    mainText.clearRect(0, 0, canvasW, canvasH);
 	    skyText.clearRect(0, 0, canvasW, canvasH);
 	    backText.clearRect(0, 0, canvasW, canvasH);
+
+
+
+
 
 	    //START MENU STATE
 	    if (currentGameState == gameStates.start)
@@ -519,6 +590,9 @@ function init(){
 	        daytick++;
 	        seagulltick++
 	        playerAnimationTick++;
+	        timetick++;
+	        playtime = getTimefromTick();
+
 	        if (daytick >= 150) {
 	            changeDayState();
 	            sea.setGradient(dayState.sea);
@@ -569,8 +643,36 @@ function init(){
 	        obstacle.render();//draw the obstacle
 	        character.render(playerAnimationFrame);//draw the character
 	        seagull.render();
+	        
+
+	        for(var i = 0; i < currenthealth; i++){
+	        	console.log(currentDonuts[i]);
+	        	currentDonuts[i].setDonut();
+	        }
+
+
+	        if(dayState == dayStates.sunset || dayState == dayStates.night){mainText.fillStyle = "white";}
+	        else {mainText.fillStyle = "black";}
+	        mainText.font = "30px Arial";
+
+	        //Labels
+	        mainText.fillText("Score:",20,50);
+	        mainText.fillText("Time:",300,50);
+
+	        mainText.font = "40px Arial";
+	        //Numbers
+	        mainText.fillText("0000",150,50);
+	        mainText.fillText(playtime,400,50);
 	    }
         //END GAME STATE
+
+
+
+        //Indicators
+		
+
+		
+
 	}, 1000/fps);
     //draw the stars
 
