@@ -103,13 +103,14 @@ var seagullpath = "Assets/Graphics/Seagull.png";
 var spazzySeagullpath = "Assets/Graphics/Spazzy.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
 var startMenuPath = "Assets/Graphics/StartScreen.png";
+var replayMenuPath = "Assets/Graphics/EndScreen.png";
 var obstacleSize = {h: 200, w: 200}
 var gravity = 8;
 var wavePushback = 5;
 var basePosition = 200;
 var xPositionLimit = canvasW - (canvasW / 4);
 var randomVelocity;
-var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp');
+var audio = new Audio('Assets/Audio/Calypso Medley - Trinidad&Tobago - Steel drums.mp3');
 var currentGameState = gameStates.start;
 
 //audio settings
@@ -341,14 +342,19 @@ class Obstacle {
     }
 }
 
+
+function startFunction(){
+    currentGameState = gameStates.game;
+    console.log("start clicked");
+}
+
 class StartMenu {
     constructor() {
         this.context = context;
         this.ready = false;
-        document.getElementById('main').addEventListener('click', function (e) {
-            currentGameState = gameStates.game;
-            console.log("clicked");
-        }, false);
+        document.getElementById('main').addEventListener('click', startFunction,
+        false
+        );
     }
 
     render() {
@@ -368,6 +374,41 @@ class StartMenu {
         }
     }
 }
+
+function replayFunction(){
+    currentGameState = gameStates.start;
+    console.log("replay clicked");
+}
+
+
+class ReplayMenu {
+    constructor() {
+        this.context = context;
+        this.ready = false;
+        document.getElementById('main').addEventListener('click', replayFunction,
+        false
+        );
+    }
+
+    render() {
+        if (this.ready) {
+            this.context.drawImage(this.image, 0, 0);
+        }
+    }
+
+    setReplayImage() {
+        var img = new Image();
+        var replay = this;
+        img.src = replayMenuPath;
+        this.image = img;
+        img.onload = function () {
+            replayMenu.ready = true;
+            replayMenu.render();
+        }
+    }
+}
+
+
 
 class SeaGull {
     constructor() {
@@ -472,7 +513,8 @@ function init(){
 	backText.canvas.width = canvasW;
 	backText.canvas.height = canvasH;
 
-
+    replayMenu = new ReplayMenu(); 
+    replayMenu.setReplayImage();
 
 	sky = new changeBlock(skyText, 0, 0, canvasW, horizon)
 	sea = new changeBlock(backText, 0, horizon, canvasW, canvasH-horizon);
@@ -481,6 +523,8 @@ function init(){
 	sky.setGradient(dayState.sky);
 	startMenu = new StartMenu();
 	startMenu.setMenuImage();
+
+
 
 	character = new Character();
     if (character.currentState == playerStates.idle) {
@@ -510,10 +554,28 @@ function init(){
 	    //START MENU STATE
 	    if (currentGameState == gameStates.start)
 	    {
+            document.getElementById('main').removeEventListener('click',
+            replayFunction,
+            false);
+            document.getElementById('main').addEventListener('click', startFunction,
+            false
+            );
 	        startMenu.render();
 	        sea.render(); //draw the sea.
 	        sky.render(); //draw the sea.
 	    }
+
+        if (currentGameState == gameStates.end)            
+        {   document.getElementById('main').removeEventListener('click',
+            startFunction,
+            false);
+            document.getElementById('main').addEventListener('click', replayFunction,
+            false
+            );
+            replayMenu.render();
+            sea.render(); //draw the sea.
+            sky.render(); //draw the sea.
+        }
 	    //GAME STATE
 	    if (currentGameState == gameStates.game) {
 	        daytick++;
@@ -569,6 +631,8 @@ function init(){
 	        obstacle.render();//draw the obstacle
 	        character.render(playerAnimationFrame);//draw the character
 	        seagull.render();
+
+
 	    }
         //END GAME STATE
 	}, 1000/fps);
