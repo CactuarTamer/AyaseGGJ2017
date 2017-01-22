@@ -102,7 +102,7 @@ var seagullpath = "Assets/Graphics/Seagull.png";
 var spazzySeagullpath = "Assets/Graphics/Spazzy.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
 var startMenuPath = "Assets/Graphics/StartScreen.png";
-var startReplayPath = "Assets/Graphics/ReplayScreen.png";
+var replayMenuPath = "Assets/Graphics/EndScreen.png";
 var obstacleSize = {h: 200, w: 200}
 var gravity = 8;
 var wavePushback = 5;
@@ -332,8 +332,9 @@ class StartMenu {
         this.context = context;
         this.ready = false;
         document.getElementById('main').addEventListener('click', function (e) {
-            currentGameState = gameStates.end; replayMenu = new ReplayMenu();
-            startMenu.setMenuImage();
+            currentGameState = gameStates.end; 
+            //replayMenu = new ReplayMenu();
+            //replayMenu.setReplayImage();
             console.log("clicked");
         }, false);
     }
@@ -362,6 +363,8 @@ class ReplayMenu {
         this.ready = false;
         document.getElementById('main').addEventListener('click', function (e) {
             currentGameState = gameStates.start;
+            //startMenu = new StartMenu(); turn this into a function?
+           //startMenu.setStartImage();
             console.log("clicked");
         }, false);
     }
@@ -529,6 +532,8 @@ function init(){
 
         if (currentGameState == gameStates.end)
         {
+            replayMenu = new ReplayMenu();
+            replayMenu.setReplayImage()
             replayMenu.render();
             sea.render(); //draw the sea.
             sky.render(); //draw the sea.
