@@ -102,6 +102,7 @@ var seagullpath = "Assets/Graphics/Seagull.png";
 var spazzySeagullpath = "Assets/Graphics/Spazzy.png";
 var obstaclePath = "Assets/Graphics/Trash.png";
 var startMenuPath = "Assets/Graphics/StartScreen.png";
+var startReplayPath = "Assets/Graphics/ReplayScreen.png";
 var obstacleSize = {h: 200, w: 200}
 var gravity = 8;
 var wavePushback = 5;
@@ -331,7 +332,8 @@ class StartMenu {
         this.context = context;
         this.ready = false;
         document.getElementById('main').addEventListener('click', function (e) {
-            currentGameState = gameStates.game;
+            currentGameState = gameStates.end; replayMenu = new ReplayMenu();
+            startMenu.setMenuImage();
             console.log("clicked");
         }, false);
     }
@@ -353,6 +355,36 @@ class StartMenu {
         }
     }
 }
+
+class ReplayMenu {
+    constructor() {
+        this.context = context;
+        this.ready = false;
+        document.getElementById('main').addEventListener('click', function (e) {
+            currentGameState = gameStates.start;
+            console.log("clicked");
+        }, false);
+    }
+
+    render() {
+        if (this.ready) {
+            this.context.drawImage(this.image, 0, 0);
+        }
+    }
+
+    setReplayImage() {
+        var img = new Image();
+        var replay = this;
+        img.src = replayMenuPath;
+        this.image = img;
+        img.onload = function () {
+            replayMenu.ready = true;
+            replayMenu.render();
+        }
+    }
+}
+
+
 
 class SeaGull {
     constructor() {
@@ -494,6 +526,13 @@ function init(){
 	        sea.render(); //draw the sea.
 	        sky.render(); //draw the sea.
 	    }
+
+        if (currentGameState == gameStates.end)
+        {
+            replayMenu.render();
+            sea.render(); //draw the sea.
+            sky.render(); //draw the sea.
+        }
 	    //GAME STATE
 	    if (currentGameState == gameStates.game) {
 	        daytick++;
@@ -540,6 +579,8 @@ function init(){
 	        obstacle.render();//draw the obstacle
 	        character.render(playerAnimationFrame);//draw the character
 	        seagull.render();
+
+
 	    }
         //END GAME STATE
 	}, 1000/fps);
